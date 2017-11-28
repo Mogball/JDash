@@ -12,7 +12,6 @@ import (
 func Init() {
     InitFirebaseApp()
     InitConfig()
-    ScheduleTasks()
 }
 
 var FirebaseApp *firebase.App
@@ -40,8 +39,4 @@ func InitFirebaseApp() {
 func InitConfig() {
     log.Println("Initializing app configuration")
     Config = config.Make()
-}
-
-func ScheduleTasks() {
-    log.Println("Scheduling dashboard tasks")
 }

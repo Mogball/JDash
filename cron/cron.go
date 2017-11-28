@@ -5,7 +5,12 @@ import (
     "log"
 )
 
+func ScheduleTasks() {
+    ScheduleTrumpTracker()
+    <- gocron.Start()
+}
+
 func ScheduleTrumpTracker() {
     log.Print("Scheduling TrumpTrackerTask")
-    gocron.Every(5).Minutes().Do(TrumpTrackerTask)
+    gocron.Every(1).Hour().Do(TrumpTrackerTask)
 }

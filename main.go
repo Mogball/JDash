@@ -41,6 +41,7 @@ func main() {
     })
 
     app.Init()
+    cron.ScheduleTasks()
 
     router.Run(":" + port)
 }
