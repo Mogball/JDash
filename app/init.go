@@ -62,6 +62,7 @@ var Context context.Context
 var Config *config.Config
 
 func InitFirebaseApp() {
+    log.Println("Initializing Firebase and Firestore")
     opt := option.WithCredentialsFile("conf/firebase_config.json")
     ctx := context.Background()
     app, err := firebase.NewApp(ctx, nil, opt)
@@ -78,9 +79,11 @@ func InitFirebaseApp() {
 }
 
 func InitConfig() {
+    log.Println("Initializing app configuration")
     Config = config.Make()
 }
 
 func ScheduleTasks() {
+    log.Println("Scheduling dashboard tasks")
     cron.ScheduleTrumpTracker()
 }
