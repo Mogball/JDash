@@ -11,7 +11,6 @@ import (
     "firebase.google.com/go"
 
     "jdash/app/config"
-    "jdash/app/cron"
 )
 
 var (
@@ -85,5 +84,4 @@ func InitConfig() {
 
 func ScheduleTasks() {
     log.Println("Scheduling dashboard tasks")
-    cron.ScheduleTrumpTracker()
 }
