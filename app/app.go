@@ -10,10 +10,15 @@ import (
 )
 
 func Init() {
-	InitFirebaseApp()
-	InitConfig()
+	if !IsInitialized {
+		log.Println("Initializing App and global parameters")
+		InitFirebaseApp()
+		InitConfig()
+		IsInitialized = true
+	}
 }
 
+var IsInitialized = false
 var FirebaseApp *firebase.App
 var FirestoreClient *firestore.Client
 var Context context.Context

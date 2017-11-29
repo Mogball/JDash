@@ -29,6 +29,7 @@ func main() {
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl.html", nil)
 	})
+
 	router.GET("/trumptracker/sites", func(c *gin.Context) {
 		c.JSON(http.StatusOK, trumptracker.GetTrackedSites())
 	})

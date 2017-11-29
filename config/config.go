@@ -16,5 +16,7 @@ func Make() *Config {
 	config.Word[TRUMP_FULL_MATCHER] = "([D|d]onald [T|t]rump)"
 	config.Word[TRUMP_PART_MATCHER] = "([T|t]rump)|([D|d]onald)"
 
+	config.Number[FIRESTORE_TRUMP_LOOKBACK] = 24
+
 	return &config
 }
