@@ -1,16 +1,20 @@
 package cron
 
 import (
-    "github.com/jasonlvhit/gocron"
-    "log"
+	"log"
+	"github.com/robfig/cron"
 )
 
+var Scheduler *cron.Cron
+
 func ScheduleTasks() {
-    ScheduleTrumpTracker()
-    <- gocron.Start()
+	Scheduler = cron.New()
+	ScheduleTrumpTracker()
+	log.Println("Starting Cron Scheduler")
+	Scheduler.Start()
 }
 
 func ScheduleTrumpTracker() {
-    log.Print("Scheduling TrumpTrackerTask")
-    gocron.Every(1).Hour().Do(TrumpTrackerTask)
+	log.Println("Scheduling TrumpTrackerTask")
+	Scheduler.AddFunc("0 * * * * *", TrumpTrackerTask)
 }

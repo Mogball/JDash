@@ -189,12 +189,6 @@
 			"revisionTime": "2017-10-04T17:02:40Z"
 		},
 		{
-			"checksumSHA1": "Epx/Fewr0QrXZRdg26+97oIoV2k=",
-			"path": "github.com/jasonlvhit/gocron",
-			"revision": "42a5804d37aa0b9239b265e894a16b8edbf52d54",
-			"revisionTime": "2016-06-29T18:10:17Z"
-		},
-		{
 			"checksumSHA1": "ZUOd8OUOp+xdpB7p4w/O86Y8wyc=",
 			"path": "github.com/manucorporat/sse",
 			"revision": "c142f0f1baea5cef7f98a8a6c222f6134368c1f5"
@@ -208,6 +202,12 @@
 			"checksumSHA1": "lQlNwdfW3dVSpBhim0KHyxcHOeo=",
 			"path": "github.com/mattn/go-isatty",
 			"revision": "7fcbc72f853b92b5720db4a6b8482be612daef24"
+		},
+		{
+			"checksumSHA1": "bOUCnFlRuGN/E633R/lFuiWVrkk=",
+			"path": "github.com/robfig/cron",
+			"revision": "2315d5715e36303a941d907f038da7f7c44c773b",
+			"revisionTime": "2017-11-01T20:10:47Z"
 		},
 		{
 			"checksumSHA1": "hKZGpbFuCrkE4s1vxubKK1aFlfI=",
