@@ -14,6 +14,7 @@ import (
 
 func main() {
 	port := os.Getenv("PORT")
+	mode := os.Getenv("MODE")
 
 	if port == "" {
 		log.Fatal("$PORT must be set")
@@ -41,7 +42,9 @@ func main() {
 	})
 
 	app.Init()
-	cron.ScheduleTasks()
+	if mode == "LOCAL" {
+		cron.ScheduleTasks()
+	}
 
 	router.Run(":" + port)
 }
