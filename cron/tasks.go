@@ -29,7 +29,7 @@ func TrumpTrackerTask() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	_, err = dataDocument.Set(app.Context, map[string]int64 {"time": timeSeconds}, firestore.MergeAll)
+	_, err = dataDocument.Set(app.Context, map[string]int64 {config.TIME: timeSeconds}, firestore.MergeAll)
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -38,7 +38,7 @@ func CountTrumps(url string) (int, int) {
 	partMatcher := regexp.MustCompile(app.Config.Word[config.TRUMP_PART_MATCHER])
 	fullMatches := fullMatcher.FindAllIndex(body, -1)
 	partMatches := partMatcher.FindAllIndex(body, -1)
-	return len(fullMatches), len(partMatches) - 2*len(fullMatches)
+	return len(fullMatches), len(partMatches)
 }
 
 func GetTrumpTrackResult(url string, timeSeconds int64) *TrumpTrackResult {

@@ -3,11 +3,36 @@
 <body>
 {{template "nav.tmpl.html"}}
 
+<div id="bootstrap-data" data-bootstrap="{{ .data }}"></div>
 <div class="container">
     <div class="row">
-
+        <div id="chart-container">
+            <svg style="height: 800px; width: 1200px;"></svg>
+        </div>
     </div>
 </div>
 
+<script>
+    $(function () {
+        const data = $('#bootstrap-data').data('bootstrap');
+        const chart = nv.models.lineChart()
+                .useInteractiveGuideline(true)
+                .duration(250)
+                .showLegend(true)
+                .showYAxis(true)
+                .showXAxis(true);
+        const timeFormat = d3.time.format('%d %b, %I:%M %p');
+        chart.xAxis
+                .axisLabel('Time')
+                .tickFormat(function (x) {
+                    return timeFormat(new Date(x * 1000));
+                });
+        chart.yAxis
+                .axisLabel('Trump Mentions');
+        d3.select('#chart-container svg')
+                .datum(data['MinorMatches'])
+                .call(chart);
+    })
+</script>
 </body>
 </html>

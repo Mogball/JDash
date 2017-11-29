@@ -10,6 +10,8 @@ import (
 	"jdash/app"
 	"jdash/trumptracker"
 	"jdash/cron"
+	"strconv"
+	"encoding/json"
 )
 
 func main() {
@@ -41,6 +43,8 @@ func main() {
 		cron.TrumpTrackerTask()
 		c.String(http.StatusOK, "OK")
 	})
+	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
+	router.GET("trumptracker/view", trumpTrackerView)
 
 	app.Init()
 	if mode == "LOCAL" {
@@ -48,4 +52,31 @@ func main() {
 	}
 
 	router.Run(":" + port)
+}
+
+func trumpTrackerViewData(c *gin.Context) {
+	lookbehindStr := c.Param("lookbehind")
+	var lookbehindTime int64
+	if lookbehindStr == "" {
+		lookbehindTime = trumptracker.DefaultLookbehind()
+	} else {
+		hours, err := strconv.Atoi(lookbehindStr)
+		if err != nil {
+			c.Error(err)
+			return
+		}
+		lookbehindTime = trumptracker.LookbehindFor(hours)
+	}
+	c.JSON(http.StatusOK, trumptracker.GetGraphData(lookbehindTime))
+}
+
+func trumpTrackerView(c *gin.Context) {
+	bootstrapData, err := json.Marshal(trumptracker.GetGraphData(trumptracker.DefaultLookbehind()))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.HTML(http.StatusOK, "graph.tmpl.html", gin.H{
+		"data": string(bootstrapData),
+	})
 }

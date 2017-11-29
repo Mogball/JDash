@@ -9,5 +9,6 @@ const FIRESTORE_TRUMP_LOOKBACK = "trump_lookback_hours"
 
 const HOURLY = "hourly"
 const DATA = "data"
+const TIME = "time"
 
 const SEC_IN_HRS = 3600
