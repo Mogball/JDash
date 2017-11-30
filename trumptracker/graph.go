@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/iterator"
 	"log"
 	"time"
+	"strings"
 )
 
 var metrics = [2]string{"MajorMatches", "MinorMatches"}
@@ -33,6 +34,20 @@ func getDataIteratorSince(lookbehindSeconds int64) *firestore.DocumentIterator {
 	return hourlyData.Where("time", ">=", lookbehindSeconds).Documents(app.Context)
 }
 
+func formatHostname(hostname string) string {
+	parts := strings.Split(hostname, ".")
+	if len(parts) == 0 {
+		return "N/A"
+	}
+	if parts[0][:3] == "www" {
+		parts = append(parts[1:])
+	}
+	if len(parts[len(parts) - 1]) <= 3 {
+		parts = append(parts[:len(parts) - 1])
+	}
+	return strings.Join(parts, ".")
+}
+
 func resultMapToValueSlice(resultMap map[string]interface{}) []TrackerValue {
 	values := make([]TrackerValue, 0, len(resultMap))
 	for hostname, value := range resultMap {
@@ -41,7 +56,7 @@ func resultMapToValueSlice(resultMap map[string]interface{}) []TrackerValue {
 			MajorMatches: valMap["MajorMatches"].(int64),
 			MinorMatches: valMap["MinorMatches"].(int64),
 			Time:         valMap["Time"].(int64),
-			Hostname:     hostname,
+			Hostname:     formatHostname(hostname),
 		})
 	}
 	return values

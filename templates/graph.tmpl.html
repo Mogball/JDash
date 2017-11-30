@@ -7,7 +7,7 @@
 <div class="container">
     <div class="row">
         <div id="chart-container">
-            <svg style="height: 800px; width: 1200px;"></svg>
+            <svg style="height: 600px;"></svg>
         </div>
     </div>
 </div>
@@ -16,11 +16,10 @@
     $(function () {
         const data = $('#bootstrap-data').data('bootstrap');
         const chart = nv.models.lineChart()
+                .margin({left: 100, right: 100})
                 .useInteractiveGuideline(true)
                 .duration(250)
-                .showLegend(true)
-                .showYAxis(true)
-                .showXAxis(true);
+                .showLegend(true);
         const timeFormat = d3.time.format('%d %b, %I:%M %p');
         chart.xAxis
                 .axisLabel('Time')
