@@ -18,3 +18,5 @@ func ScheduleTrumpTracker() {
 	log.Println("Scheduling TrumpTrackerTask")
 	Scheduler.AddFunc("@hourly", TrumpTrackerTask)
 }
+
+

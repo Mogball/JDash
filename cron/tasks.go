@@ -9,6 +9,7 @@ import (
 	"jdash/config"
 	"jdash/trumptracker"
 	"log"
+	"jdash/strangetracker"
 )
 
 func TrumpTrackerTask() {
@@ -34,4 +35,13 @@ func TrumpTrackerTask() {
 		log.Fatalln(err)
 	}
 	log.Printf("Pushed [%d] track results to Firestore", len(trackerResultList))
+}
+
+func StrangeTrackerDOMTask() {
+	domResult := strangetracker.TrackDOMNow()
+	timeKey := strconv.FormatInt(timeSeconds, 10)
+	dailyData := app.FirestoreClient.Collection(config.FIRESTORE_STRANGE_TRACKER).Doc(config.FIRESTORE_DOM_DATA)
+	dataMap := map[string]interface{} {
+
+	}
 }
