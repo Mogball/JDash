@@ -44,15 +44,16 @@ func stripRawCountFromTarget(url string, countRegex string) (int, error) {
 		return 0, errors.New("failed to find count element")
 	}
 	if selection.Length() > 1 {
-		log.Fatalln("Found more than one count element")
+		log.Println("[WARNING] Found more than one count element")
 	}
 	rawCount := selection.First().Text()
 	countMatcher := regexp.MustCompile(countRegex)
 	if countMatcher.FindStringIndex(rawCount) == nil {
 		return 0, errors.New("count does not match regex")
 	}
+	log.Printf("Raw count value is [%s]", rawCount)
 	commaStripped := strings.Replace(rawCount, ",", "", -1)
-	count, err := strconv.Atoi(commaStripped[1:len(rawCount)-1])
+	count, err := strconv.Atoi(commaStripped[1:len(commaStripped)-1])
 	if err != nil {
 		return 0, errors.New("count was not a number")
 	}
@@ -64,13 +65,18 @@ func getCountFromDOMConfig() int {
 	url := breakAndGetDOMFromConfig()
 	count, err := stripRawCountFromTarget(url, regex)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		count = 0
 	}
 	return count
 }
 
 func TrackDOMNow() DOMResult {
-	count := getCountFromDOMConfig()
 	timeSeconds := time.Now().Unix()
-	return count, timeSeconds
+	log.Printf("Generating DOM result for time [%d]", timeSeconds)
+	count := getCountFromDOMConfig()
+	return DOMResult{
+		Time:  timeSeconds,
+		Count: count,
+	}
 }

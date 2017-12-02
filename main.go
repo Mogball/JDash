@@ -12,6 +12,7 @@ import (
 	"jdash/cron"
 	"strconv"
 	"encoding/json"
+	"jdash/strangetracker"
 )
 
 func main() {
@@ -41,6 +42,14 @@ func main() {
 	})
 	router.GET("trumptracker/now/push", func(c *gin.Context) {
 		cron.TrumpTrackerTask()
+		c.String(http.StatusOK, "OK")
+	})
+	router.GET("strangetracker/dom/now/get", func(c *gin.Context) {
+		domResult := strangetracker.TrackDOMNow()
+		c.JSON(http.StatusOK, domResult)
+	})
+	router.GET("strangetracker/dom/now/push", func(c *gin.Context) {
+		cron.StrangeTrackerDOMTask()
 		c.String(http.StatusOK, "OK")
 	})
 	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
