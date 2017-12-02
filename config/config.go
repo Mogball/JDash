@@ -23,8 +23,15 @@ func Make() *Config {
 		"https://www.theglobeandmail.com"
 	config.Word[TRUMP_FULL_MATCHER] = "([D|d]onald [T|t]rump)"
 	config.Word[TRUMP_PART_MATCHER] = "([T|t]rump)|([D|d]onald)"
-
 	config.Number[FIRESTORE_TRUMP_LOOKBACK] = 336
+
+	config.Word[STRANGE_DOM_STRING] = "225|249|183|229|31|31|78|144|69|30|102|54|222|124|59|181|111|153|222|144|183|79|19|237|196|233|200|9|19|194|155|242|194|236|111|89|115|124|116|51|48"
+	config.Word[STRANGE_DOM_SEP] = "|"
+	config.Number[STRANGE_DOM_OFFSET_A] = 11
+	config.Number[STRANGE_DOM_OFFSET_B] = 5
+	config.Number[STRANGE_DOM_OFFSET_C] = 41
+	config.Number[STRANGE_DOM_MOD] = 130968
+
 
 	return &config
 }
