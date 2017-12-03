@@ -28,11 +28,11 @@ func CountTrumps(url string) (int, int) {
 	resp, err := http.Get(url)
 	defer resp.Body.Close()
 	if err != nil {
-		return -1, -1
+		log.Println(err)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return -1, -1
+		log.Println(err)
 	}
 	fullMatcher := regexp.MustCompile(app.Config.Word[config.TRUMP_FULL_MATCHER])
 	partMatcher := regexp.MustCompile(app.Config.Word[config.TRUMP_PART_MATCHER])

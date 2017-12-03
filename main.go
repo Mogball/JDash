@@ -55,7 +55,7 @@ func main() {
 	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
 	router.GET("trumptracker/view", trumpTrackerView)
 
-	router.GET("render/view/tank/:file", func(c *gin.Context) {
+	router.GET("render/view/:file", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "render.tmpl.html", gin.H{
 			"file": c.Param("file"),
 		})
