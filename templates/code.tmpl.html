@@ -1,0 +1,54 @@
+<html>
+{{template "header.tmpl.html"}}
+<body>
+{{template "nav.tmpl.html"}}
+
+<div id="url-data" data-encode="{{ .encodeUrl }}" data-decode="{{ .decodeUrl }}"></div>
+<div class="container">
+    <div class="row">
+        <div id="form-container">
+            <form id="message-form">
+                <fieldset>
+                    <div class="form-group">
+                        <label class="control-label" for="message">Message to encode</label>
+                        <textarea id="message" name="message" class="form-control" rows="10" cols="75"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button id="submit-encode" type="button" class="btn btn-primary">Encode</button>
+                    </div>
+                </fieldset>
+            </form>
+            <form id="encoded-form">
+                <fieldset>
+                    <div class="form-group">
+                        <label class="control-label" for="encoded">String to decode</label>
+                        <textarea id="encoded" name="encoded" class="form-control" rows="10" cols="75"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button id="submit-decode" type="button" class="btn btn-primary">Decode</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const urlData = $('#url-data');
+    $(function () {
+        $('#submit-encode').on('click', function (e) {
+            e.preventDefault();
+            $.post(urlData.data('encode'), $('#message-form').serialize(), function (encoded) {
+                $('#encoded').val(encoded);
+            });
+        });
+        $('#submit-decode').on('click', function (e) {
+            e.preventDefault();
+            $.post(urlData.data('decode'), $('#encoded-form').serialize(), function (message) {
+                $('#message').val(message);
+            });
+        });
+    });
+</script>
+</body>
+</html>

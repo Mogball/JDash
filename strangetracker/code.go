@@ -21,7 +21,7 @@ func splitAndGetBytes(encodedString string, separator string) []byte {
 	for i, _ := range pieces {
 		ordinal, err := strconv.Atoi(pieces[i])
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 			bytes[i] = 0
 			continue
 		}

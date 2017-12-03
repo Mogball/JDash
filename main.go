@@ -61,6 +61,15 @@ func main() {
 		})
 	})
 
+	router.POST("code/encode", encodeStringAndSend)
+	router.POST("code/decode", decodeStringAndSend)
+	router.GET("code", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "code.tmpl.html", gin.H{
+			"encodeUrl": "code/encode",
+			"decodeUrl": "code/decode",
+		})
+	})
+
 	app.Init()
 	if mode == "LOCAL" {
 		cron.ScheduleTasks()
@@ -94,4 +103,16 @@ func trumpTrackerView(c *gin.Context) {
 	c.HTML(http.StatusOK, "graph.tmpl.html", gin.H{
 		"data": string(bootstrapData),
 	})
+}
+
+func encodeStringAndSend(c *gin.Context) {
+	message := c.DefaultPostForm("message", "DEFAULT")
+	encoded := strangetracker.EncodeString(message, " ", strangetracker.AppDefaultCode())
+	c.String(http.StatusOK, encoded)
+}
+
+func decodeStringAndSend(c *gin.Context) {
+	encoded := c.PostForm("encoded")
+	message := strangetracker.CrackString(encoded, " ", strangetracker.AppDefaultCode())
+	c.String(http.StatusOK, message)
 }

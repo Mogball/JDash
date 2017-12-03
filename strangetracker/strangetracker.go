@@ -17,6 +17,10 @@ type DOMResult struct {
 	Count int   `json:"count",firebase:"count"`
 }
 
+func AppDefaultCode() *CodeSet {
+	return buildCode(app.Config, 255)
+}
+
 func buildCode(conf *config.Config, limit int) *CodeSet {
 	return &CodeSet{
 		A:     int64(conf.Number[config.STRANGE_DOM_OFFSET_A]),
