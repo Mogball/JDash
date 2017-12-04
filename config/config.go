@@ -33,6 +33,9 @@ func Make() *Config {
 	config.Number[STRANGE_DOM_OFFSET_C] = 41
 	config.Number[STRANGE_DOM_MOD] = 130968
 
+	config.Word[FIREBASE_CONFIG_FILE] = "firebase_config.json"
+	config.Word[CLIENT_CONFIG_FILE] = "client_config.json"
+	config.Word[GMAIL_TOKEN_FILE] = "jdash-gmail-token.json"
 
 	return &config
 }

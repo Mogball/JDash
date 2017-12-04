@@ -10,6 +10,7 @@ import (
 	"jdash/trumptracker"
 	"log"
 	"jdash/strangetracker"
+	"golang.org/x/net/context"
 )
 
 func TrumpTrackerTask() {
@@ -26,11 +27,12 @@ func TrumpTrackerTask() {
 		trackerMap[trackedUrl.Host] = trackerResultList[i]
 	}
 	dataDocument := hourlyData.Doc(timeKey)
-	_, err := dataDocument.Set(app.Context, trackerMap, firestore.MergeAll)
+	ctx := context.Background()
+	_, err := dataDocument.Set(ctx, trackerMap, firestore.MergeAll)
 	if err != nil {
 		log.Println(err)
 	}
-	_, err = dataDocument.Set(app.Context, map[string]int64 {config.TIME: timeSeconds}, firestore.MergeAll)
+	_, err = dataDocument.Set(ctx, map[string]int64 {config.TIME: timeSeconds}, firestore.MergeAll)
 	if err != nil {
 		log.Println(err)
 	}
@@ -41,6 +43,6 @@ func StrangeTrackerDOMTask() {
 	domResult := strangetracker.TrackDOMNow()
 	timeKey := strconv.FormatInt(domResult.Time, 10)
 	dailyData := app.FirestoreClient.Collection(config.FIRESTORE_STRANGE_TRACKER).Doc(config.FIRESTORE_DOM_DATA).Collection(config.DATA)
-	dailyData.Doc(timeKey).Set(app.Context, domResult)
+	dailyData.Doc(timeKey).Set(context.Background(), domResult)
 	log.Printf("Pushed DOM result to Firestore")
 }

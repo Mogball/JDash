@@ -12,8 +12,8 @@ import (
 func Init() {
 	if !IsInitialized {
 		log.Println("Initializing App and global parameters")
-		InitFirebaseApp()
 		InitConfig()
+		InitFirebaseApp()
 		IsInitialized = true
 	}
 }
@@ -21,12 +21,20 @@ func Init() {
 var IsInitialized = false
 var FirebaseApp *firebase.App
 var FirestoreClient *firestore.Client
-var Context context.Context
-var Config *config.Config
+
+var appConfig *config.Config
+
+func Config() *config.Config {
+	if appConfig == nil {
+		InitConfig()
+	}
+	return appConfig
+}
 
 func InitFirebaseApp() {
 	log.Println("Initializing Firebase and Firestore")
-	opt := option.WithCredentialsFile("firebase_config.json")
+	configFile := Config().Word[config.FIREBASE_CONFIG_FILE]
+	opt := option.WithCredentialsFile(configFile)
 	ctx := context.Background()
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
@@ -38,10 +46,9 @@ func InitFirebaseApp() {
 	}
 	FirebaseApp = app
 	FirestoreClient = client
-	Context = ctx
 }
 
 func InitConfig() {
 	log.Println("Initializing app configuration")
-	Config = config.Make()
+	appConfig = config.Make()
 }

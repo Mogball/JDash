@@ -18,6 +18,10 @@ const STRANGE_DOM_RAW_COUNT = "raw_count_match"
 const FIRESTORE_STRANGE_TRACKER = "strange_tracker"
 const FIRESTORE_DOM_DATA = "dom_data"
 
+const FIREBASE_CONFIG_FILE = "firebase_config_file"
+const CLIENT_CONFIG_FILE = "client_config_file"
+const GMAIL_TOKEN_FILE = "gmail_token_file"
+
 const NUM_CHARS = 255
 
 const HOURLY = "hourly"

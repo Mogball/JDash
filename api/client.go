@@ -1,4 +1,4 @@
-package gmail
+package api
 
 import (
 	"golang.org/x/oauth2"
@@ -11,52 +11,55 @@ import (
 	"path/filepath"
 	"net/url"
 	"fmt"
+	"jdash/config"
 	"jdash/app"
 	"io/ioutil"
-	"google.golang.org/api/gmail/v1"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/gmail/v1"
 )
 
-func CreateClient() (*gmail.Service, error) {
-	ctx := app.Context
-	conf, err := ioutil.ReadFile("client_config.json")
+func CreateGmailClient() *http.Client {
+	configFile := app.Config().Word[config.CLIENT_CONFIG_FILE]
+	ctx := context.Background()
+	return createAuthorizedClient(ctx, configFile)
+}
+
+func createAuthorizedClient(ctx context.Context, configFile string) *http.Client {
+	configData, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		log.Fatalf("Failed to read gmail config file: %v", err)
+		log.Fatalf("Unable to read client config file: %v", err)
 	}
-	config, err := google.ConfigFromJSON(conf, gmail.GmailReadonlyScope)
+	config, err := google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
 	if err != nil {
-		log.Fatalf("Unable to parse client config file: %v", err)
+		log.Fatalf("Unable to parse client conig: %v", err)
 	}
-	client := getClient(ctx, config)
-	return gmail.New(client)
+	return getClient(ctx, config)
 }
 
 func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
-	var tok *oauth2.Token
 	cacheFile, err := tokenCacheFile()
 	if err != nil {
-		log.Printf("Unable to get path to cached file: %v", err)
+		log.Printf("Cannot get credential file path: %v", err)
+		return config.Client(ctx, getTokenFromWeb(config))
+	}
+	tok, err := tokenFromFile(cacheFile)
+	if err != nil {
 		tok = getTokenFromWeb(config)
-	} else {
-		tok, err := tokenFromFile(cacheFile)
-		if err != nil {
-			tok = getTokenFromWeb(config)
-			saveToken(cacheFile, tok)
-		}
+		saveToken(cacheFile, tok)
 	}
 	return config.Client(ctx, tok)
 }
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 	authUrl := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	log.Printf("Manual authorization required:\n%v", authUrl)
+	fmt.Printf("Manual authorization required:\n%v\n", authUrl)
 	var code string
 	if _, err := fmt.Scan(&code); err != nil {
 		log.Fatalf("Unable to read authorization code: %v", err)
 	}
 	tok, err := config.Exchange(context.TODO(), code)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		log.Fatalf("Unable to retrieve token: %v", err)
 	}
 	return tok
 }
@@ -68,7 +71,8 @@ func tokenCacheFile() (string, error) {
 	}
 	tokenCacheDir := filepath.Join(usr.HomeDir, ".credentials")
 	os.MkdirAll(tokenCacheDir, 0700)
-	return filepath.Join(tokenCacheDir, url.QueryEscape("jdash-gmail-token.json")), nil
+	return filepath.Join(tokenCacheDir,
+		url.QueryEscape(app.Config().Word[config.GMAIL_TOKEN_FILE])), err
 }
 
 func tokenFromFile(file string) (*oauth2.Token, error) {
@@ -83,10 +87,10 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 func saveToken(file string, token *oauth2.Token) {
-	log.Printf("Saving credential file to: %s", file)
+	log.Printf("Saving token to file: %s\n", file)
 	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		log.Printf("Unable to cache oauth token: %v", err)
+		log.Printf("Unable to save token: %v", err)
 		return
 	}
 	defer f.Close()

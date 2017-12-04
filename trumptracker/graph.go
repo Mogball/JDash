@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 	"strings"
+	"golang.org/x/net/context"
 )
 
 var metrics = [2]string{"MajorMatches", "MinorMatches"}
@@ -31,7 +32,7 @@ type Series struct {
 
 func getDataIteratorSince(lookbehindSeconds int64) *firestore.DocumentIterator {
 	hourlyData := app.FirestoreClient.Collection(config.FIRESTORE_TRUMP_DATA).Doc(config.HOURLY).Collection(config.DATA)
-	return hourlyData.Where("time", ">=", lookbehindSeconds).Documents(app.Context)
+	return hourlyData.Where("time", ">=", lookbehindSeconds).Documents(context.Background())
 }
 
 func formatHostname(hostname string) string {
@@ -113,7 +114,7 @@ func parseDataIterator(dataIter *firestore.DocumentIterator) map[string][]Series
 }
 
 func DefaultLookbehind() int64 {
-	return time.Now().Unix() - int64(app.Config.Number[config.FIRESTORE_TRUMP_LOOKBACK] * config.SEC_IN_HRS)
+	return time.Now().Unix() - int64(app.Config().Number[config.FIRESTORE_TRUMP_LOOKBACK] * config.SEC_IN_HRS)
 }
 
 func LookbehindFor(hours int) int64 {

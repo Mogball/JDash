@@ -18,7 +18,7 @@ type DOMResult struct {
 }
 
 func AppDefaultCode() *CodeSet {
-	return buildCode(app.Config, 255)
+	return buildCode(app.Config(), 255)
 }
 
 func buildCode(conf *config.Config, limit int) *CodeSet {
@@ -32,9 +32,9 @@ func buildCode(conf *config.Config, limit int) *CodeSet {
 }
 
 func breakAndGetDOMFromConfig() string {
-	code := buildCode(app.Config, config.NUM_CHARS)
-	sep := app.Config.Word[config.STRANGE_DOM_SEP]
-	value := app.Config.Word[config.STRANGE_DOM_STRING]
+	code := buildCode(app.Config(), config.NUM_CHARS)
+	sep := app.Config().Word[config.STRANGE_DOM_SEP]
+	value := app.Config().Word[config.STRANGE_DOM_STRING]
 	return CrackString(value, sep, code)
 }
 
@@ -65,7 +65,7 @@ func stripRawCountFromTarget(url string, countRegex string) (int, error) {
 }
 
 func getCountFromDOMConfig() int {
-	regex := app.Config.Word[config.STRANGE_DOM_RAW_COUNT]
+	regex := app.Config().Word[config.STRANGE_DOM_RAW_COUNT]
 	url := breakAndGetDOMFromConfig()
 	count, err := stripRawCountFromTarget(url, regex)
 	if err != nil {
