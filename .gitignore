@@ -1,3 +1,4 @@
 .env
 .docker_build/
 .idea/
+.DS_Store
