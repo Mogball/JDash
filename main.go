@@ -1,118 +1,127 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"os/user"
+	"path/filepath"
 
-	"github.com/gin-gonic/gin"
-	_ "github.com/heroku/x/hmetrics/onload"
-	"jdash/app"
-	"jdash/trumptracker"
-	"jdash/cron"
-	"strconv"
-	"encoding/json"
-	"jdash/strangetracker"
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/gmail/v1"
 )
 
-func main() {
-	port := os.Getenv("PORT")
-	mode := os.Getenv("MODE")
-
-	if port == "" {
-		log.Fatal("$PORT must be set")
-	}
-
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.LoadHTMLGlob("templates/*.tmpl.html")
-	router.Static("/static", "static")
-	router.StaticFile("/favicon.ico", "resources/favicon.ico")
-
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl.html", nil)
-	})
-
-	router.GET("/trumptracker/sites", func(c *gin.Context) {
-		c.JSON(http.StatusOK, trumptracker.GetTrackedSites())
-	})
-	router.GET("/trumptracker/now/get", func(c *gin.Context) {
-		trackerResultList, _ := trumptracker.TrumpTrackNow()
-		c.JSON(http.StatusOK, trackerResultList)
-	})
-	router.GET("trumptracker/now/push", func(c *gin.Context) {
-		cron.TrumpTrackerTask()
-		c.String(http.StatusOK, "OK")
-	})
-	router.GET("strangetracker/dom/now/get", func(c *gin.Context) {
-		domResult := strangetracker.TrackDOMNow()
-		c.JSON(http.StatusOK, domResult)
-	})
-	router.GET("strangetracker/dom/now/push", func(c *gin.Context) {
-		cron.StrangeTrackerDOMTask()
-		c.String(http.StatusOK, "OK")
-	})
-	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
-	router.GET("trumptracker/view", trumpTrackerView)
-
-	router.GET("render/view/:file", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "render.tmpl.html", gin.H{
-			"file": c.Param("file"),
-		})
-	})
-
-	router.POST("code/encode", encodeStringAndSend)
-	router.POST("code/decode", decodeStringAndSend)
-	router.GET("code", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "code.tmpl.html", gin.H{
-			"encodeUrl": "code/encode",
-			"decodeUrl": "code/decode",
-		})
-	})
-
-	app.Init()
-	if mode == "LOCAL" {
-		cron.ScheduleTasks()
-	}
-
-	router.Run(":" + port)
-}
-
-func trumpTrackerViewData(c *gin.Context) {
-	lookbehindStr := c.Param("lookbehind")
-	var lookbehindTime int64
-	if lookbehindStr == "" {
-		lookbehindTime = trumptracker.DefaultLookbehind()
-	} else {
-		hours, err := strconv.Atoi(lookbehindStr)
-		if err != nil {
-			c.Error(err)
-			return
-		}
-		lookbehindTime = trumptracker.LookbehindFor(hours)
-	}
-	c.JSON(http.StatusOK, trumptracker.GetGraphData(lookbehindTime))
-}
-
-func trumpTrackerView(c *gin.Context) {
-	bootstrapData, err := json.Marshal(trumptracker.GetGraphData(trumptracker.DefaultLookbehind()))
+// getClient uses a Context and Config to retrieve a Token
+// then generate a Client. It returns the generated Client.
+func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
+	cacheFile, err := tokenCacheFile()
 	if err != nil {
-		c.Error(err)
-		return
+		log.Fatalf("Unable to get path to cached credential file. %v", err)
 	}
-	c.HTML(http.StatusOK, "graph.tmpl.html", gin.H{
-		"data": string(bootstrapData),
-	})
+	tok, err := tokenFromFile(cacheFile)
+	if err != nil {
+		tok = getTokenFromWeb(config)
+		saveToken(cacheFile, tok)
+	}
+	return config.Client(ctx, tok)
 }
 
-func encodeStringAndSend(c *gin.Context) {
-	message := c.DefaultPostForm("message", "DEFAULT")
-	encoded := strangetracker.EncodeString(message, " ", strangetracker.AppDefaultCode())
-	c.String(http.StatusOK, encoded)
+// getTokenFromWeb uses Config to request a Token.
+// It returns the retrieved Token.
+func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
+	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	fmt.Printf("Go to the following link in your browser then type the "+
+		"authorization code: \n%v\n", authURL)
+
+	var code string
+	if _, err := fmt.Scan(&code); err != nil {
+		log.Fatalf("Unable to read authorization code %v", err)
+	}
+
+	tok, err := config.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		log.Fatalf("Unable to retrieve token from web %v", err)
+	}
+	return tok
 }
 
-func decodeStringAndSend(c *gin.Context) {
-	encoded := c.PostForm("encoded")
-	message := strangetracker.CrackString(encoded, " ", strangetracker.AppDefaultCode())
-	c.String(http.StatusOK, message)
+// tokenCacheFile generates credential file path/filename.
+// It returns the generated credential path/filename.
+func tokenCacheFile() (string, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	tokenCacheDir := filepath.Join(usr.HomeDir, ".credentials")
+	os.MkdirAll(tokenCacheDir, 0700)
+	return filepath.Join(tokenCacheDir,
+		url.QueryEscape("gmail-go-quickstart.json")), err
+}
+
+// tokenFromFile retrieves a Token from a given file path.
+// It returns the retrieved Token and any read error encountered.
+func tokenFromFile(file string) (*oauth2.Token, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	t := &oauth2.Token{}
+	err = json.NewDecoder(f).Decode(t)
+	defer f.Close()
+	return t, err
+}
+
+// saveToken uses a file path to create a file and store the
+// token in it.
+func saveToken(file string, token *oauth2.Token) {
+	fmt.Printf("Saving credential file to: %s\n", file)
+	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		log.Fatalf("Unable to cache oauth token: %v", err)
+	}
+	defer f.Close()
+	json.NewEncoder(f).Encode(token)
+}
+
+func main() {
+	ctx := context.Background()
+
+	b, err := ioutil.ReadFile("client_config.json")
+	if err != nil {
+		log.Fatalf("Unable to read client secret file: %v", err)
+	}
+
+	// If modifying these scopes, delete your previously saved credentials
+	// at ~/.credentials/gmail-go-quickstart.json
+	config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
+	if err != nil {
+		log.Fatalf("Unable to parse client secret file to config: %v", err)
+	}
+	client := getClient(ctx, config)
+
+	srv, err := gmail.New(client)
+	if err != nil {
+		log.Fatalf("Unable to retrieve gmail Client %v", err)
+	}
+
+	username := "me"
+	r, err := srv.Users.Labels.List(username).Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve labels. %v", err)
+	}
+	if len(r.Labels) > 0 {
+		fmt.Print("Labels:\n")
+		for _, l := range r.Labels {
+			fmt.Printf("- %s\n",  l.Name)
+		}
+	} else {
+		fmt.Print("No labels found.")
+	}
+
 }
