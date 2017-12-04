@@ -16,7 +16,7 @@ import (
 func TrumpTrackerTask() {
 	trackerResultList, timeSeconds := trumptracker.TrumpTrackNow()
 	timeKey := strconv.FormatInt(timeSeconds, 10)
-	hourlyData := app.FirestoreClient.Collection(config.FIRESTORE_TRUMP_DATA).Doc(config.HOURLY).Collection(config.DATA)
+	hourlyData := app.FirestoreClient().Collection(config.FIRESTORE_TRUMP_DATA).Doc(config.HOURLY).Collection(config.DATA)
 	trackerMap := make(map[string]*trumptracker.TrumpTrackResult)
 	for i := 0; i < len(trackerResultList); i++ {
 		trackedUrl, err := url.Parse(trackerResultList[i].Url)
@@ -42,7 +42,7 @@ func TrumpTrackerTask() {
 func StrangeTrackerDOMTask() {
 	domResult := strangetracker.TrackDOMNow()
 	timeKey := strconv.FormatInt(domResult.Time, 10)
-	dailyData := app.FirestoreClient.Collection(config.FIRESTORE_STRANGE_TRACKER).Doc(config.FIRESTORE_DOM_DATA).Collection(config.DATA)
+	dailyData := app.FirestoreClient().Collection(config.FIRESTORE_STRANGE_TRACKER).Doc(config.FIRESTORE_DOM_DATA).Collection(config.DATA)
 	dailyData.Doc(timeKey).Set(context.Background(), domResult)
 	log.Printf("Pushed DOM result to Firestore")
 }

@@ -31,7 +31,7 @@ type Series struct {
 }
 
 func getDataIteratorSince(lookbehindSeconds int64) *firestore.DocumentIterator {
-	hourlyData := app.FirestoreClient.Collection(config.FIRESTORE_TRUMP_DATA).Doc(config.HOURLY).Collection(config.DATA)
+	hourlyData := app.FirestoreClient().Collection(config.FIRESTORE_TRUMP_DATA).Doc(config.HOURLY).Collection(config.DATA)
 	return hourlyData.Where("time", ">=", lookbehindSeconds).Documents(context.Background())
 }
 

@@ -1,26 +1,30 @@
 package main
 
 import (
-	"jdash/api/gmail"
-	"log"
-	"jdash/app"
 	"fmt"
+	"log"
+	"google.golang.org/api/gmail/v1"
+	"jdash/api"
 )
 
 func main() {
-	app.Init()
-	srv, err := gmail.CreateClient()
-	log.Println(err)
-	r, err := srv.Users.Labels.List("me").Do()
+	srv, err := gmail.New(api.CreateGmailClient())
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to retrieve gmail Client %v", err)
+	}
+
+	username := "me"
+	r, err := srv.Users.Labels.List(username).Do()
+	if err != nil {
+		log.Fatalf("Unable to retrieve labels. %v", err)
 	}
 	if len(r.Labels) > 0 {
 		fmt.Print("Labels:\n")
 		for _, l := range r.Labels {
-			fmt.Printf("- %s\n", l.Name)
+			fmt.Printf("- %s\n",  l.Name)
 		}
 	} else {
-		fmt.Println("No labels found")
+		fmt.Print("No labels found.")
 	}
+
 }

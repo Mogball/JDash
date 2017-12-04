@@ -1,30 +1,118 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"google.golang.org/api/gmail/v1"
-	"jdash/api"
+	"net/http"
+	"os"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/heroku/x/hmetrics/onload"
+	"jdash/app"
+	"jdash/trumptracker"
+	"jdash/cron"
+	"strconv"
+	"encoding/json"
+	"jdash/strangetracker"
 )
 
 func main() {
-	srv, err := gmail.New(api.CreateGmailClient())
-	if err != nil {
-		log.Fatalf("Unable to retrieve gmail Client %v", err)
+	port := os.Getenv("PORT")
+	mode := os.Getenv("MODE")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
 	}
 
-	username := "me"
-	r, err := srv.Users.Labels.List(username).Do()
-	if err != nil {
-		log.Fatalf("Unable to retrieve labels. %v", err)
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.LoadHTMLGlob("templates/*.tmpl.html")
+	router.Static("/static", "static")
+	router.StaticFile("/favicon.ico", "resources/favicon.ico")
+
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.tmpl.html", nil)
+	})
+
+	router.GET("/trumptracker/sites", func(c *gin.Context) {
+		c.JSON(http.StatusOK, trumptracker.GetTrackedSites())
+	})
+	router.GET("/trumptracker/now/get", func(c *gin.Context) {
+		trackerResultList, _ := trumptracker.TrumpTrackNow()
+		c.JSON(http.StatusOK, trackerResultList)
+	})
+	router.GET("trumptracker/now/push", func(c *gin.Context) {
+		cron.TrumpTrackerTask()
+		c.String(http.StatusOK, "OK")
+	})
+	router.GET("strangetracker/dom/now/get", func(c *gin.Context) {
+		domResult := strangetracker.TrackDOMNow()
+		c.JSON(http.StatusOK, domResult)
+	})
+	router.GET("strangetracker/dom/now/push", func(c *gin.Context) {
+		cron.StrangeTrackerDOMTask()
+		c.String(http.StatusOK, "OK")
+	})
+	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
+	router.GET("trumptracker/view", trumpTrackerView)
+
+	router.GET("render/view/:file", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "render.tmpl.html", gin.H{
+			"file": c.Param("file"),
+		})
+	})
+
+	router.POST("code/encode", encodeStringAndSend)
+	router.POST("code/decode", decodeStringAndSend)
+	router.GET("code", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "code.tmpl.html", gin.H{
+			"encodeUrl": "code/encode",
+			"decodeUrl": "code/decode",
+		})
+	})
+
+	app.Init()
+	if mode == "LOCAL" {
+		cron.ScheduleTasks()
 	}
-	if len(r.Labels) > 0 {
-		fmt.Print("Labels:\n")
-		for _, l := range r.Labels {
-			fmt.Printf("- %s\n",  l.Name)
-		}
+
+	router.Run(":" + port)
+}
+
+func trumpTrackerViewData(c *gin.Context) {
+	lookbehindStr := c.Param("lookbehind")
+	var lookbehindTime int64
+	if lookbehindStr == "" {
+		lookbehindTime = trumptracker.DefaultLookbehind()
 	} else {
-		fmt.Print("No labels found.")
+		hours, err := strconv.Atoi(lookbehindStr)
+		if err != nil {
+			c.Error(err)
+			return
+		}
+		lookbehindTime = trumptracker.LookbehindFor(hours)
 	}
+	c.JSON(http.StatusOK, trumptracker.GetGraphData(lookbehindTime))
+}
 
+func trumpTrackerView(c *gin.Context) {
+	bootstrapData, err := json.Marshal(trumptracker.GetGraphData(trumptracker.DefaultLookbehind()))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.HTML(http.StatusOK, "graph.tmpl.html", gin.H{
+		"data": string(bootstrapData),
+	})
+}
+
+func encodeStringAndSend(c *gin.Context) {
+	message := c.DefaultPostForm("message", "DEFAULT")
+	encoded := strangetracker.EncodeString(message, " ", strangetracker.AppDefaultCode())
+	c.String(http.StatusOK, encoded)
+}
+
+func decodeStringAndSend(c *gin.Context) {
+	encoded := c.PostForm("encoded")
+	message := strangetracker.CrackString(encoded, " ", strangetracker.AppDefaultCode())
+	c.String(http.StatusOK, message)
 }

@@ -21,7 +21,7 @@ type TrumpTrackResult struct {
 }
 
 func GetTrackedSites() []string {
-	return strings.Split(app.Config.Word[config.TRUMP_SITES], ",")
+	return strings.Split(app.Config().Word[config.TRUMP_SITES], ",")
 }
 
 func CountTrumps(url string) (int, int) {
@@ -34,8 +34,8 @@ func CountTrumps(url string) (int, int) {
 	if err != nil {
 		return -1, -1
 	}
-	fullMatcher := regexp.MustCompile(app.Config.Word[config.TRUMP_FULL_MATCHER])
-	partMatcher := regexp.MustCompile(app.Config.Word[config.TRUMP_PART_MATCHER])
+	fullMatcher := regexp.MustCompile(app.Config().Word[config.TRUMP_FULL_MATCHER])
+	partMatcher := regexp.MustCompile(app.Config().Word[config.TRUMP_PART_MATCHER])
 	fullMatches := fullMatcher.FindAllIndex(body, -1)
 	partMatches := partMatcher.FindAllIndex(body, -1)
 	return len(fullMatches), len(partMatches)

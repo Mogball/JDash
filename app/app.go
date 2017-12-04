@@ -9,26 +9,36 @@ import (
 	"google.golang.org/api/option"
 )
 
+var IsInitialized = false
+
+var firestoreClient *firestore.Client
+var appConfig *config.Config
+
 func Init() {
 	if !IsInitialized {
 		log.Println("Initializing App and global parameters")
-		InitConfig()
-		InitFirebaseApp()
+		if appConfig == nil {
+			InitConfig()
+		}
+		if firestoreClient == nil {
+			InitFirebaseApp()
+		}
 		IsInitialized = true
 	}
 }
-
-var IsInitialized = false
-var FirebaseApp *firebase.App
-var FirestoreClient *firestore.Client
-
-var appConfig *config.Config
 
 func Config() *config.Config {
 	if appConfig == nil {
 		InitConfig()
 	}
 	return appConfig
+}
+
+func FirestoreClient() *firestore.Client {
+	if firestoreClient == nil {
+		InitFirebaseApp()
+	}
+	return firestoreClient
 }
 
 func InitFirebaseApp() {
@@ -44,8 +54,7 @@ func InitFirebaseApp() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	FirebaseApp = app
-	FirestoreClient = client
+	firestoreClient = client
 }
 
 func InitConfig() {
