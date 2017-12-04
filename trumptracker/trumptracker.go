@@ -28,10 +28,16 @@ func CountTrumps(url string) (int, int) {
 	resp, err := http.Get(url)
 	defer resp.Body.Close()
 	if err != nil {
+		log.Printf("Error during GET request to tracked site: %v", err)
+		return -1, -1
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Println("GET request returned non-200 response")
 		return -1, -1
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("Error while reading response body: %v", err)
 		return -1, -1
 	}
 	fullMatcher := regexp.MustCompile(app.Config().Word[config.TRUMP_FULL_MATCHER])
