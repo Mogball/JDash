@@ -86,6 +86,9 @@
     }
 
     function guiMesh(gui, mesh) {
+        gui.add(mesh.rotation, 'x', -4, 4);
+        gui.add(mesh.rotation, 'y', -4, 4);
+        gui.add(mesh.rotation, 'z', -4, 4);
         gui.addColor(mesh.material, 'color');
     }
 </script>
