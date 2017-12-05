@@ -1,27 +1,27 @@
 <html>
-{{template "header.tmpl.html"}}
-<style>
-    body {
-        margin: 0;
-        font-size: 15px;
-        line-height: 18px;
-        overflow: hidden;
-    }
+<head>
+    <title>JDash Renderer</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="/static/js/three.min.js"></script>
+    <script src="/static/js/dat.gui.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-size: 15px;
+            line-height: 18px;
+            overflow: hidden;
+        }
 
-    canvas {
-        width: 100%;
-        height: 100%
-    }
-</style>
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+    </style>
+</head>
 <body>
 <div id="bootstrap-data" data-file="{{ .file }}"></div>
-<script src="/static/js/three.min.js"></script>
 <script>
-    function view() {
-    }
-
     var gui = new dat.GUI();
-
     var scene = new THREE.Scene();
 
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 10, 50);
@@ -71,10 +71,12 @@
         */
 
         scene.add(mesh);
-        guiMesh(gui, mesh);
+        guiMaterial(gui, mesh.material);
 
         function render() {
+            requestAnimationFrame(render);
             renderer.render(scene, camera);
+            mesh.rotation.y += 0.005;
         }
 
         window.addEventListener('resize', function () {
@@ -85,11 +87,16 @@
         render()
     }
 
-    function guiMesh(gui, mesh) {
-        gui.add(mesh.rotation, 'x', -4, 4);
-        gui.add(mesh.rotation, 'y', -4, 4);
-        gui.add(mesh.rotation, 'z', -4, 4);
-        gui.addColor(mesh.material, 'color');
+    function guiMaterial(gui, material) {
+        var data = {
+            color: material.color.getHex()
+        };
+        gui.addColor(data, 'color').onChange(function (val) {
+            if (typeof val === 'string') {
+                val = val.replace('#', '0x');
+            }
+            material.color.setHex(val);
+        })
     }
 </script>
 </body>
