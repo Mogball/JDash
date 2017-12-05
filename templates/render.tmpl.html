@@ -17,6 +17,11 @@
 <div id="bootstrap-data" data-file="{{ .file }}"></div>
 <script src="/static/js/three.min.js"></script>
 <script>
+    function view() {
+    }
+
+    var gui = new dat.GUI();
+
     var scene = new THREE.Scene();
 
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 10, 50);
@@ -66,10 +71,9 @@
         */
 
         scene.add(mesh);
+        guiMesh(gui, mesh);
 
         function render() {
-            requestAnimationFrame(render);
-            mesh.rotation.y += 0.005;
             renderer.render(scene, camera);
         }
 
@@ -79,6 +83,10 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }, false);
         render()
+    }
+
+    function guiMesh(gui, mesh) {
+        gui.addColor(mesh.material, 'color');
     }
 </script>
 </body>
