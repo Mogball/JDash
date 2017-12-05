@@ -30,7 +30,7 @@ type Series struct {
 	Name   string  `json:"key"`
 }
 
-func getDataIteratorSince(lookbehindSeconds int64) *firestore.DocumentIterator {
+func GetDataIteratorSince(lookbehindSeconds int64) *firestore.DocumentIterator {
 	hourlyData := app.FirestoreClient().Collection(config.FIRESTORE_TRUMP_DATA).Doc(config.HOURLY).Collection(config.DATA)
 	return hourlyData.Where("time", ">=", lookbehindSeconds).Documents(context.Background())
 }
@@ -83,7 +83,7 @@ func parseDataIterator(dataIter *firestore.DocumentIterator) map[string][]Series
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			break
 		}
 		resultMap := doc.Data()
@@ -122,5 +122,5 @@ func LookbehindFor(hours int) int64 {
 }
 
 func GetGraphData(lookbehind int64) map[string][]Series {
-	return parseDataIterator(getDataIteratorSince(lookbehind))
+	return parseDataIterator(GetDataIteratorSince(lookbehind))
 }
