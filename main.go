@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"encoding/json"
 	"jdash/strangetracker"
+	"jdash/render"
 )
 
 func main() {
@@ -55,10 +56,9 @@ func main() {
 	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
 	router.GET("trumptracker/view", trumpTrackerView)
 
-	router.GET("render/view/:file", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "render.tmpl.html", gin.H{
-			"file": c.Param("file"),
-		})
+	router.GET("render/view", func(c *gin.Context) {
+		files, _ := json.Marshal(render.GetRenderFiles())
+		c.HTML(http.StatusOK, "render.tmpl.html", gin.H{"files": string(files)})
 	})
 
 	router.POST("code/encode", encodeStringAndSend)
