@@ -29,11 +29,11 @@ func createAuthorizedClient(ctx context.Context, configFile string) *http.Client
 	if err != nil {
 		log.Fatalf("Unable to read client config file: %v", err)
 	}
-	config, err := google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
+	clientConfig, err := google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
 	if err != nil {
 		log.Fatalf("Unable to parse client conig: %v", err)
 	}
-	return getClient(ctx, config)
+	return getClient(ctx, clientConfig)
 }
 
 func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
