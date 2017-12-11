@@ -55,6 +55,7 @@ func main() {
 	})
 	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
 	router.GET("trumptracker/view", trumpTrackerView)
+	router.GET("strangetracker/dom/view", strangeDomView)
 
 	router.GET("render/view", func(c *gin.Context) {
 		files, _ := json.Marshal(render.GetRenderFiles())
@@ -102,6 +103,8 @@ func trumpTrackerView(c *gin.Context) {
 	}
 	c.HTML(http.StatusOK, "graph.tmpl.html", gin.H{
 		"data": string(bootstrapData),
+		"axis": "Trump Mentions",
+		"metric": "MinorMatches",
 	})
 }
 
@@ -115,4 +118,17 @@ func decodeStringAndSend(c *gin.Context) {
 	encoded := c.PostForm("encoded")
 	message := strangetracker.CrackString(encoded, " ", strangetracker.AppDefaultCode())
 	c.String(http.StatusOK, message)
+}
+
+func strangeDomView(c *gin.Context) {
+	bootstrapData, err := json.Marshal(strangetracker.GetGraphData(strangetracker.DefaultLookbehind()))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.HTML(http.StatusOK, "graph.tmpl.html", gin.H{
+		"data": string(bootstrapData),
+		"axis": "DOM Count",
+		"metric": "default",
+	})
 }

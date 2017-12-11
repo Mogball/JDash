@@ -17,6 +17,7 @@ const STRANGE_DOM_RAW_COUNT = "raw_count_match"
 
 const FIRESTORE_STRANGE_TRACKER = "strange_tracker"
 const FIRESTORE_DOM_DATA = "dom_data"
+const FIRESTORE_DOM_LOOKBACK = "dom_lookback_days"
 
 const FIREBASE_CONFIG_FILE = "firebase_config_file"
 const CLIENT_CONFIG_FILE = "client_config_file"
@@ -28,4 +29,5 @@ const HOURLY = "hourly"
 const DATA = "data"
 const TIME = "time"
 
-const SEC_IN_HRS = 3600
+const SEC_IN_HR = 3600
+const SEC_IN_DAY = 86400

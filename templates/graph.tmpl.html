@@ -3,11 +3,15 @@
 <body>
 {{template "nav.tmpl.html"}}
 
-<div id="bootstrap-data" data-bootstrap="{{ .data }}"></div>
+<div id="bootstrap-data"
+     data-bootstrap="{{ .data }}"
+     data-metric="{{ .metric }}"
+     data-axis="{{ .axis }}">
+</div>
 <div class="container">
     <div class="row">
         <div id="chart-container">
-            <svg style="height: 600px;"></svg>
+            <svg style="height: 630px;"></svg>
         </div>
     </div>
 </div>

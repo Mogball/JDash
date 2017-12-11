@@ -114,11 +114,11 @@ func parseDataIterator(dataIter *firestore.DocumentIterator) map[string][]Series
 }
 
 func DefaultLookbehind() int64 {
-	return time.Now().Unix() - int64(app.Config().Number[config.FIRESTORE_TRUMP_LOOKBACK] * config.SEC_IN_HRS)
+	return time.Now().Unix() - int64(app.Config().Number[config.FIRESTORE_TRUMP_LOOKBACK] * config.SEC_IN_HR)
 }
 
 func LookbehindFor(hours int) int64 {
-	return time.Now().Unix() - int64(hours * config.SEC_IN_HRS)
+	return time.Now().Unix() - int64(hours * config.SEC_IN_HR)
 }
 
 func GetGraphData(lookbehind int64) map[string][]Series {

@@ -32,6 +32,7 @@ func Make() *Config {
 	config.Number[STRANGE_DOM_OFFSET_B] = 5
 	config.Number[STRANGE_DOM_OFFSET_C] = 41
 	config.Number[STRANGE_DOM_MOD] = 130968
+	config.Number[FIRESTORE_DOM_LOOKBACK] = 120
 
 	config.Word[FIREBASE_CONFIG_FILE] = "firebase_config.json"
 	config.Word[CLIENT_CONFIG_FILE] = "client_config.json"
