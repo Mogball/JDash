@@ -43,7 +43,7 @@ func runTask() {
 			valMap := value.(map[string]interface{})
 			major := valMap["MajorMatches"].(int64)
 			minor := valMap["MinorMatches"].(int64)
-			if major == -1 || minor == -1 {
+			if major <= 0 && minor <= 0 {
 				log.Printf("Found error at time [%d] for [%s]", time, name)
 				prevVal, prevOk := dataMap[times[i]][name]
 				nextVal, nextOk := dataMap[times[i+2]][name]
@@ -53,12 +53,15 @@ func runTask() {
 				curRes := parseTrumpTrackResult(value)
 				prevRes := parseTrumpTrackResult(prevVal)
 				nextRes := parseTrumpTrackResult(nextVal)
+				if (prevRes.MinorMatches <= 0 && prevRes.MajorMatches <= 0) || (nextRes.MinorMatches <= 0 && prevRes.MajorMatches <= 0) {
+					continue
+				}
 				curRes.MajorMatches = (prevRes.MajorMatches + nextRes.MajorMatches) / 2
 				curRes.MinorMatches = (prevRes.MinorMatches + nextRes.MinorMatches) / 2
 				trackerData := app.FirestoreClient().Collection(config.FIRESTORE_TRUMP_DATA)
 				hourlyData := trackerData.Doc(config.HOURLY).Collection(config.DATA)
 				document := hourlyData.Doc(strconv.FormatInt(time, 10))
-				_, err := document.Set(ctx, map[string]interface{} {name: curRes}, firestore.MergeAll)
+				_, err := document.Set(ctx, map[string]interface{}{name: curRes}, firestore.MergeAll)
 				if err != nil {
 					log.Printf("Error while fixing anomaly: %v", err)
 				}
@@ -72,8 +75,8 @@ func parseTrumpTrackResult(i interface{}) *trumptracker.TrumpTrackResult {
 	return &trumptracker.TrumpTrackResult{
 		MajorMatches: int(valMap["MajorMatches"].(int64)),
 		MinorMatches: int(valMap["MinorMatches"].(int64)),
-		Url: valMap["Url"].(string),
-		Time: valMap["Time"].(int64),
+		Url:          valMap["Url"].(string),
+		Time:         valMap["Time"].(int64),
 	}
 }
 
