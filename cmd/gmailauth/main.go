@@ -1,28 +1,76 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"google.golang.org/api/gmail/v1"
 	"jdash/api"
-	"strings"
 	"regexp"
+	"github.com/jfcote87/google-api-go-client/batch"
+	"github.com/jfcote87/google-api-go-client/batch/credentials"
+	"golang.org/x/net/context"
+	"fmt"
+	"strings"
 	"strconv"
 	"math"
 )
 
 func main() {
-	srv, err := gmail.New(api.CreateGmailClient())
-	if err != nil {
-		log.Fatalf("Unable to retrieve gmail Client %v", err)
-	}
-
-	username := "me"
-	response, err := srv.Users.Messages.List(username).Q("from:'Uber Receipts'").Do()
+	clientConfig, err := api.GetConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
+	token := api.GetToken(clientConfig)
+	ctx := context.Background()
+	client := clientConfig.Client(ctx, token)
+	srv, err := gmail.New(client)
+	if err != nil {
+		log.Fatalf("Unable to retrieve gmail Client %v", err)
+	}
+	batchsrv := batch.Service{}
+	batchgsv, _ := gmail.New(batch.BatchClient)
+
+	username := "me"
+	messages := make([]*gmail.Message, 0)
+	response, err := srv.Users.Messages.List(username).Q("from:'Uber Receipts'").Fields("nextPageToken,messages(id)").Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for ; response.Messages != nil; {
+		messages = append(messages, response.Messages...)
+		if len(response.NextPageToken) > 0 {
+			response, err = srv.Users.Messages.List(username).Q("from:'Uber Receipts'").PageToken(response.NextPageToken).Do()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			break
+		}
+	}
 	dollarRegex := regexp.MustCompile("(\\$[0-9,]+(\\.[0-9]{2})?)")
+	dollarRegex.FindString("sd")
+	for _, message := range messages {
+		res, err := batchgsv.Users.Messages.Get(username, message.Id).Fields("snippet").Do()
+		cred := &credentials.Oauth2Credentials{
+			TokenSource: clientConfig.TokenSource(ctx, token),
+		}
+		if err = batchsrv.AddRequest(err,
+			batch.SetResult(&res),
+			batch.SetCredentials(cred)); err != nil {
+			log.Fatal(err)
+		}
+	}
+	responses, err := batchsrv.DoCtx(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	/*for _, r := range responses {
+		if r.Err != nil {
+			log.Fatal(r.Err)
+			continue
+		}
+		res := r.Result.(*gmail.Message)
+		fmt.Println(res.Snippet)
+	}*/
 	totalSpent := 0
 	uberCount := 0
 	uberSpent := 0
@@ -31,11 +79,8 @@ func main() {
 	uberEatsFee := 0
 	cancelled := 0
 	cancelledFee := 0
-	for _, message := range response.Messages {
-		res, err := srv.Users.Messages.Get(username, message.Id).Do()
-		if err != nil {
-			log.Println(err)
-		}
+	for _, r := range responses {
+		res := r.Result.(*gmail.Message)
 		match := dollarRegex.FindString(res.Snippet)
 		if match != "" {
 			match = strings.Replace(match[1:], ",", "", -1)
@@ -58,10 +103,10 @@ func main() {
 			cancelledFee += 500
 		}
 	}
-	fmt.Printf("Total: $%.2f\n", float64(totalSpent) / 100.0)
+	fmt.Printf("Total: $%.2f\n", float64(totalSpent)/100.0)
 	fmt.Printf("UberEATS Count: %d\n", uberEatsCount)
-	fmt.Printf("UberEATS: $%.2f\n", float64(uberEats) / 100.0)
-	fmt.Printf("UberEATS Fee: $%.2f\n", float64(uberEatsFee) / 100.0)
+	fmt.Printf("UberEATS: $%.2f\n", float64(uberEats)/100.0)
+	fmt.Printf("UberEATS Fee: $%.2f\n", float64(uberEatsFee)/100.0)
 	fmt.Printf("Uber Count: %d\n", uberCount)
-	fmt.Printf("Uber: $%.2f", float64(uberSpent) / 100.0)
+	fmt.Printf("Uber: $%.2f", float64(uberSpent)/100.0)
 }

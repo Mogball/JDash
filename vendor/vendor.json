@@ -202,6 +202,12 @@
 			"revisionTime": "2017-10-04T17:02:40Z"
 		},
 		{
+			"checksumSHA1": "HFAkqP/C/knJ7xZVLOg+PnRhyBE=",
+			"path": "github.com/jfcote87/google-api-go-client/batch",
+			"revision": "889d53e2c18a4c8e6aec41705aa7f8eda95ae7b1",
+			"revisionTime": "2017-06-08T21:46:09Z"
+		},
+		{
 			"checksumSHA1": "ZUOd8OUOp+xdpB7p4w/O86Y8wyc=",
 			"path": "github.com/manucorporat/sse",
 			"revision": "c142f0f1baea5cef7f98a8a6c222f6134368c1f5"

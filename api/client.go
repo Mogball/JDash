@@ -25,29 +25,42 @@ func CreateGmailClient() *http.Client {
 }
 
 func createAuthorizedClient(ctx context.Context, configFile string) *http.Client {
-	configData, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		log.Fatalf("Unable to read client config file: %v", err)
-	}
-	clientConfig, err := google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
+	clientConfig, err := getConfig(configFile)
 	if err != nil {
 		log.Fatalf("Unable to parse client conig: %v", err)
 	}
 	return getClient(ctx, clientConfig)
 }
 
-func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
+func GetConfig() (*oauth2.Config, error) {
+	configFile := app.Config().Word[config.CLIENT_CONFIG_FILE]
+	return getConfig(configFile)
+}
+
+func getConfig(configFile string) (*oauth2.Config, error) {
+	configData, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+	return google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
+}
+
+func GetToken(config *oauth2.Config) *oauth2.Token {
 	cacheFile, err := tokenCacheFile()
 	if err != nil {
 		log.Printf("Cannot get credential file path: %v", err)
-		return config.Client(ctx, getTokenFromWeb(config))
+		return getTokenFromWeb(config)
 	}
 	tok, err := tokenFromFile(cacheFile)
-	if err != nil {
+	if err != nil || !tok.Valid() {
 		tok = getTokenFromWeb(config)
 		saveToken(cacheFile, tok)
 	}
-	return config.Client(ctx, tok)
+	return tok
+}
+
+func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
+	return config.Client(ctx, GetToken(config))
 }
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
