@@ -53,6 +53,9 @@ func main() {
 		cron.StrangeTrackerDOMTask()
 		c.String(http.StatusOK, "OK")
 	})
+	router.GET("ubercounter", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "uber.tmpl.html", nil)
+	})
 	router.GET("trumptracker/view/data/:lookbehind", trumpTrackerViewData)
 	router.GET("trumptracker/view", trumpTrackerView)
 	router.GET("strangetracker/dom/view", strangeDomView)
