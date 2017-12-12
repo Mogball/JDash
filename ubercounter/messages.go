@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"math"
 	"golang.org/x/oauth2"
+	"fmt"
 )
 
 type UberCount struct {
@@ -21,6 +22,14 @@ type UberCount struct {
 	UberCount      int
 	UberEatsCount  int
 	CancelledCount int
+}
+
+func PrettyPrintCount(count *UberCount) {
+	fmt.Printf("Total Spent: $%.2f\n", float32(count.TotalSpent)/100.0)
+	fmt.Printf("Uber Count: %d\n", count.UberCount)
+	fmt.Printf("Uber Spent: $%.2f\n", float32(count.UberSpent)/100.0)
+	fmt.Printf("UberEATS Count: %d\n", count.UberEatsCount)
+	fmt.Printf("UberEATS Spent: $%.2f\n", float32(count.UberEatsSpent)/100.0)
 }
 
 func UberCountFor(username string, conf *oauth2.Config, token *oauth2.Token) (*UberCount, error) {
@@ -41,6 +50,9 @@ func UberCountFor(username string, conf *oauth2.Config, token *oauth2.Token) (*U
 	}
 	creds := &credentials.Oauth2Credentials{TokenSource: conf.TokenSource(ctx, token)}
 	for _, receipt := range receipts {
+		if receipt == nil {
+			continue
+		}
 		getCall := batchGsv.Users.Messages.Get(username, receipt.Id)
 		getCall.Fields("snippet")
 		res, err := getCall.Do()
@@ -89,7 +101,7 @@ func fetchUberReceipts(username string, service *gmail.Service, conf *config.Con
 	if err != nil {
 		return nil, err
 	}
-	messages := make([]*gmail.Message, len(response.Messages))
+	messages := make([]*gmail.Message, 0, len(response.Messages))
 	for ; response.Messages != nil; {
 		messages = append(messages, response.Messages...)
 		if len(response.NextPageToken) > 0 {
