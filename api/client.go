@@ -45,36 +45,43 @@ func getConfig(configFile string) (*oauth2.Config, error) {
 	return google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
 }
 
-func GetToken(config *oauth2.Config) *oauth2.Token {
+func GetCacheToken(config *oauth2.Config) *oauth2.Token {
 	cacheFile, err := tokenCacheFile()
 	if err != nil {
 		log.Printf("Cannot get credential file path: %v", err)
-		return getTokenFromWeb(config)
+		tok, err := GetTokenFromWeb(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return tok
 	}
 	tok, err := tokenFromFile(cacheFile)
 	if err != nil || !tok.Valid() {
-		tok = getTokenFromWeb(config)
+		tok, err = GetTokenFromWeb(config)
+		if err != nil {
+			log.Fatal(err)
+		}
 		saveToken(cacheFile, tok)
 	}
 	return tok
 }
 
 func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
-	return config.Client(ctx, GetToken(config))
+	return config.Client(ctx, GetCacheToken(config))
 }
 
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
+func GetTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 	authUrl := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	fmt.Printf("Manual authorization required:\n%v\n", authUrl)
 	var code string
 	if _, err := fmt.Scan(&code); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
+		return nil, err
 	}
 	tok, err := config.Exchange(context.TODO(), code)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token: %v", err)
+		return nil, err
 	}
-	return tok
+	return tok, nil
 }
 
 func tokenCacheFile() (string, error) {

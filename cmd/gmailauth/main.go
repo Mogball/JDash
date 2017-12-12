@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	token := api.GetToken(clientConfig)
+	token := api.GetCacheToken(clientConfig)
 	ctx := context.Background()
 	client := clientConfig.Client(ctx, token)
 	srv, err := gmail.New(client)

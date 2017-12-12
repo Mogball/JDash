@@ -23,6 +23,9 @@ const FIREBASE_CONFIG_FILE = "firebase_config_file"
 const CLIENT_CONFIG_FILE = "client_config_file"
 const GMAIL_TOKEN_FILE = "gmail_token_file"
 
+const UBER_COUNT_QUERY = "uber_count_query"
+const UBER_COUNT_DOLLAR = "uber_count_dollar_regex"
+
 const NUM_CHARS = 255
 
 const HOURLY = "hourly"

@@ -34,6 +34,9 @@ func Make() *Config {
 	config.Number[STRANGE_DOM_MOD] = 130968
 	config.Number[FIRESTORE_DOM_LOOKBACK] = 120
 
+	config.Word[UBER_COUNT_QUERY] = "from:'Uber Receipts'"
+	config.Word[UBER_COUNT_DOLLAR] = "(\\$[0-9,]+(\\.[0-9]{2})?)"
+
 	config.Word[FIREBASE_CONFIG_FILE] = "firebase_config.json"
 	config.Word[CLIENT_CONFIG_FILE] = "client_config.json"
 	config.Word[GMAIL_TOKEN_FILE] = "jdash-gmail-token.json"
