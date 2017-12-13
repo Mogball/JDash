@@ -70,7 +70,7 @@ func main() {
 	router.GET("trumptracker/view", trumpTrackerView)
 	router.GET("strangetracker/dom/view", strangeDomView)
 	router.GET("gmailAuthenticate", gmailAuthenticateUrl)
-	router.GET("ubercounter/perform/:token", gmailPerformCount)
+	router.GET("ubercounter/perform", gmailPerformCount)
 	router.GET("render/view", func(c *gin.Context) {
 		files, _ := json.Marshal(render.GetRenderFiles())
 		c.HTML(http.StatusOK, "render.tmpl.html", gin.H{"files": string(files)})
@@ -155,13 +155,12 @@ func gmailAuthenticateUrl(c *gin.Context) {
 	if err != nil {
 		c.Error(err)
 	}
-	conf.RedirectURL = app.Config().Word[config.OAUTH_REDIRECT]
 	url := conf.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	c.String(http.StatusOK, url)
 }
 
 func gmailPerformCount(c *gin.Context) {
-	code := c.Param("token")
+	code := c.Request.URL.Query()["code"][0]
 	conf, err := api.GetConfig()
 	if err != nil {
 		c.Error(err)

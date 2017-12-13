@@ -42,7 +42,12 @@ func getConfig(configFile string) (*oauth2.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	return google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
+	conf, err := google.ConfigFromJSON(configData, gmail.GmailReadonlyScope)
+	if err != nil {
+		return nil, err
+	}
+	conf.RedirectURL = app.Config().Word[config.OAUTH_REDIRECT]
+	return conf, err
 }
 
 func GetCacheToken(config *oauth2.Config) *oauth2.Token {
