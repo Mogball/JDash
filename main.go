@@ -174,5 +174,5 @@ func gmailPerformCount(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-
+	c.JSON(http.StatusOK, result)
 }

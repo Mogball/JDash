@@ -80,14 +80,22 @@
             if (!win || !win.closed) {
                 return;
             }
-            extractCode(win.document.URL);
+            submitToken(extractCode(win.document.URL));
             clearInterval(check);
         }, 100);
     }
 
+    function handleResult(result) {
+        console.log(result);
+    }
+
     function submitToken(token) {
         $.ajax({
-            url:
+            url: '/ubercounter/perform/' + token,
+            success: handleResult,
+            error: function (err) {
+                toastr.warning(err);
+            }
         })
     }
 
