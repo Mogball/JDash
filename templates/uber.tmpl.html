@@ -3,7 +3,9 @@
     <title>JDash Uber Counter</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
     <style>
         .card {
             position: relative;
@@ -54,12 +56,53 @@
             <div class="card-body">
                 <h4 class="card-title">Uber Counter</h4>
                 <p>Wonder how much you've spent on Uber and UberEATS?</p>
-                <button type="button" class="btn btn-danger">Make me feel bad</button>
+                <button id="submit" type="button" class="btn btn-danger">Make me feel bad</button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="/static/js/uber.js"></script>
+<script>
+    function extractCode(url) {
+        const params = url.substring(url.lastIndexOf('?') + 1, url.length - 1).split('&');
+        for (const i in params) {
+            const pair = params[i].split('=');
+            if (pair[0] === 'code') {
+                return pair[1];
+            }
+        }
+        return null;
+    }
+
+    function handleAuth(url) {
+        const win = window.open(url, "Authenticate Gmail");
+        const check = setInterval(function () {
+            if (!win || !win.closed) {
+                return;
+            }
+            extractCode(win.document.URL);
+            clearInterval(check);
+        }, 100);
+    }
+
+    function submitToken(token) {
+        $.ajax({
+            url:
+        })
+    }
+
+    $(function () {
+        $('#submit').on('click', function (evt) {
+            evt.preventDefault();
+            $.ajax({
+                url: '/gmailAuthenticate',
+                success: handleAuth,
+                error: function (err) {
+                    toastr.warning(err);
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

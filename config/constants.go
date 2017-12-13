@@ -25,6 +25,7 @@ const GMAIL_TOKEN_FILE = "gmail_token_file"
 
 const UBER_COUNT_QUERY = "uber_count_query"
 const UBER_COUNT_DOLLAR = "uber_count_dollar_regex"
+const OAUTH_REDIRECT = "oauth_redirect_url"
 
 const NUM_CHARS = 255
 

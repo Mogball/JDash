@@ -16,12 +16,12 @@ import (
 )
 
 type UberCount struct {
-	TotalSpent     int
-	UberSpent      int
-	UberEatsSpent  int
-	UberCount      int
-	UberEatsCount  int
-	CancelledCount int
+	TotalSpent     int `json:"totalSpent"`
+	UberSpent      int `json:"uberSpent"`
+	UberEatsSpent  int `json:"uberEatsSpent"`
+	UberCount      int `json:"uberCount"`
+	UberEatsCount  int `json:"uberEatsCount"`
+	CancelledCount int `json:"cancelledCount"`
 }
 
 func PrettyPrintCount(count *UberCount) {

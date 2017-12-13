@@ -36,6 +36,7 @@ func Make() *Config {
 
 	config.Word[UBER_COUNT_QUERY] = "from:'Uber Receipts'"
 	config.Word[UBER_COUNT_DOLLAR] = "(\\$[0-9,]+(\\.[0-9]{2})?)"
+	config.Word[OAUTH_REDIRECT] = "http://localhost:5000/oauth2callback"
 
 	config.Word[FIREBASE_CONFIG_FILE] = "firebase_config.json"
 	config.Word[CLIENT_CONFIG_FILE] = "client_config.json"
