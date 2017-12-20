@@ -88,7 +88,7 @@ func UberCountFor(username string, conf *oauth2.Config, token *oauth2.Token) (*U
 				uberCount.UberEatsCount++
 				uberCount.UberEatsSpent += cents
 			} else {
-				uberCount.UberValues = append(uberCount.UberEatsValues, cents)
+				uberCount.UberValues = append(uberCount.UberValues, cents)
 				uberCount.UberCount++
 				uberCount.UberSpent += cents
 			}

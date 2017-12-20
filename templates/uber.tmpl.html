@@ -8,6 +8,27 @@
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
     <style>
+        .bar rect {
+            fill: steelblue;
+            shape-rendering: crispEdges;
+        }
+
+        .bar text {
+            fill: #fff;
+        }
+
+        .axis path, .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .line {
+            fill: none;
+            stroke: #000;
+            stroke-width: 1px;
+        }
+
         .card {
             position: relative;
             display: -ms-flexbox;
@@ -142,7 +163,7 @@
                 max = values[i];
             }
         }
-        return { min, max }
+        return {min, max}
     }
 
     function handleResult(result) {
@@ -157,6 +178,7 @@
         $('#ubereats-average').text(formatCents(result.uberEatsSpent / result.uberEatsCount));
         $('.display').css('display', 'block');
         histogram('#uber-histogram', result.uberValues);
+        histogram('#ubereats-histogram', result.uberEatsValues);
     }
 
     function submitToken(token) {
