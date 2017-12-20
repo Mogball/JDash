@@ -16,12 +16,14 @@ import (
 )
 
 type UberCount struct {
-	TotalSpent     int `json:"totalSpent"`
-	UberSpent      int `json:"uberSpent"`
-	UberEatsSpent  int `json:"uberEatsSpent"`
-	UberCount      int `json:"uberCount"`
-	UberEatsCount  int `json:"uberEatsCount"`
-	CancelledCount int `json:"cancelledCount"`
+	TotalSpent     int   `json:"totalSpent"`
+	UberSpent      int   `json:"uberSpent"`
+	UberEatsSpent  int   `json:"uberEatsSpent"`
+	UberCount      int   `json:"uberCount"`
+	UberEatsCount  int   `json:"uberEatsCount"`
+	CancelledCount int   `json:"cancelledCount"`
+	UberValues     []int `json:"uberValues"`
+	UberEatsValues []int `json:"uberEatsValues"`
 }
 
 func PrettyPrintCount(count *UberCount) {
@@ -67,6 +69,8 @@ func UberCountFor(username string, conf *oauth2.Config, token *oauth2.Token) (*U
 		return nil, err
 	}
 	uberCount := &UberCount{}
+	uberCount.UberValues = make([]int, 0)
+	uberCount.UberEatsValues = make([]int, 0)
 	dollarRegex := regexp.MustCompile(app.Config().Word[config.UBER_COUNT_DOLLAR])
 	for _, res := range receiptResults {
 		receipt := res.Result.(*gmail.Message)
@@ -80,9 +84,11 @@ func UberCountFor(username string, conf *oauth2.Config, token *oauth2.Token) (*U
 			cents := int(math.Floor(money*100 + 0.5))
 			uberCount.TotalSpent += cents
 			if strings.Contains(receipt.Snippet, "UberEATS") {
+				uberCount.UberEatsValues = append(uberCount.UberEatsValues, cents)
 				uberCount.UberEatsCount++
 				uberCount.UberEatsSpent += cents
 			} else {
+				uberCount.UberValues = append(uberCount.UberEatsValues, cents)
 				uberCount.UberCount++
 				uberCount.UberSpent += cents
 			}
