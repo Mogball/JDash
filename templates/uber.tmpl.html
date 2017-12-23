@@ -119,7 +119,6 @@
             <br/>
             <h3 class="text-center">Uber Distribution</h3>
             <div id="uber-histogram"></div>
-            <br/>
             <h3 class="text-center">Uber Eats Distribution</h3>
             <div id="ubereats-histogram"></div>
         </div>
@@ -213,7 +212,7 @@
             return;
         }
         const formatCount = d3.format(',.0f');
-        const margin = {top: 10, right: 30, bottom: 30, left: 30},
+        const margin = {top: 10, right: 30, bottom: 80, left: 30},
                 width = $(selector).width() - margin.left - margin.right,
                 height = 400 - margin.top - margin.bottom;
         const x = d3.scale.linear()
@@ -244,7 +243,8 @@
                 .range([height, 0]);
         const xAxis = d3.svg.axis()
                 .scale(x)
-                .orient('bottom');
+                .orient('bottom')
+                .tickFormat(d3.format('$.,2f'));
         const line = d3.svg.line()
                 .x(function (d) {
                     return x(d.x);
